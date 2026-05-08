@@ -11,9 +11,9 @@ public sealed class OxygenWarningViewModel : MonoBehaviour
 
     [Header("Vignette Alpha")]
     [SerializeField] private float _lowVignetteAlpha = 0.1f;
-    [SerializeField] private float _warningVignetteAlpha = 0.2f;
-    [SerializeField] private float _criticalVignetteAlpha = 0.3f;
-    [SerializeField] private float _depletedVignetteAlpha = 0.4f;
+    [SerializeField] private float _warningVignetteAlpha = 0.15f;
+    [SerializeField] private float _criticalVignetteAlpha = 0.2f;
+    [SerializeField] private float _depletedVignetteAlpha = 0.3f;
 
     [Header("Overlay Alpha")]
     [SerializeField] private float _lowOverlayAlpha = 0.05f;
