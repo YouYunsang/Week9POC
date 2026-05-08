@@ -2,21 +2,22 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
-  tags: []
+  serializedVersion: 3
+  tags:
+  - Enemy
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
   - 
+  - Ground
   - 
+  - Interactable
   - 
-  - 
-  - 
-  - 
+  - Obstacle
   - 
   - 
   - 
@@ -41,3 +42,35 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 268446609
+    locked: 0
+  - name: Map_Back
+    uniqueID: 1421722751
+    locked: 0
+  - name: Map_Mid
+    uniqueID: 742877989
+    locked: 0
+  - name: Map_Front
+    uniqueID: 1680326763
+    locked: 0
+  - name: Obstacle
+    uniqueID: 2396451487
+    locked: 0
+  - name: Interactable
+    uniqueID: 2032430701
+    locked: 0
+  - name: Item
+    uniqueID: 1718303639
+    locked: 0
+  - name: Enemy
+    uniqueID: 320841751
+    locked: 0
+  - name: Player
+    uniqueID: 2388919735
+    locked: 0
+  - name: UI
+    uniqueID: 530342241
+    locked: 0
+  m_RenderingLayers:
+  - Default

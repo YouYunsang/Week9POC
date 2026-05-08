@@ -34,6 +34,25 @@ public sealed class InputManager : MonoBehaviour
 
     public void OnInteract(InputAction.CallbackContext context)
     {
+        if (_playerInputReader == null)
+        {
+            return;
+        }
+
+        if (context.performed)
+        {
+            _playerInputReader.NotifyInteractInputStarted();
+            return;
+        }
+
+        if (context.canceled)
+        {
+            _playerInputReader.NotifyInteractInputCanceled();
+        }
+    }
+
+    public void OnFlashlight(InputAction.CallbackContext context)
+    {
         if (!context.performed)
         {
             return;
@@ -44,8 +63,8 @@ public sealed class InputManager : MonoBehaviour
             return;
         }
 
-        // 상호작용은 performed 시점에 한 번만 전달한다.
-        _playerInputReader.NotifyInteractInputStarted();
+        // F 입력으로 플래시라이트 토글을 요청한다.
+        _playerInputReader.NotifyFlashlightToggleInputStarted();
     }
 
     public void OnZoom(InputAction.CallbackContext context)

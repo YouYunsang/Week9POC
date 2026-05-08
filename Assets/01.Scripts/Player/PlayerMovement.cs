@@ -8,6 +8,7 @@ public sealed class PlayerMovement : MonoBehaviour
     private Rigidbody2D _rigidbody;
     private Vector2 _moveInput;
     private bool _isSprinting;
+    private bool _isBuoyancyEnabled = true;
 
     private const float DIRECTION_EPSILON = 0.01f;
 
@@ -95,6 +96,11 @@ public sealed class PlayerMovement : MonoBehaviour
         {
             // 아래로 잠수하는 입력은 부력에 저항하는 느낌을 위해 더 둔하게 만든다.
             return verticalInput * speed * _movementData.DownwardSpeedMultiplier;
+        }
+
+        if (!_isBuoyancyEnabled)
+        {
+            return 0.0f;
         }
 
         // 수직 입력이 없으면 몸이 조금씩 떠오른다.
@@ -187,5 +193,10 @@ public sealed class PlayerMovement : MonoBehaviour
 
         // 현재 이동 방향과 목표 이동 방향이 반대인지 확인한다.
         return Mathf.Sign(currentVelocity) != Mathf.Sign(targetVelocity);
+    }
+
+    public void SetBuoyancyEnabled(bool isEnabled)
+    {
+        _isBuoyancyEnabled = isEnabled;
     }
 }

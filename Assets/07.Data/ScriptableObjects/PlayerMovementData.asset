@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbf996f7b1ce0fd4ba117622e485b476, type: 3}
   m_Name: PlayerMovementData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMovementData
-  _baseMoveSpeed: 2.2
-  _sprintSpeedMultiplier: 1.45
+  _baseMoveSpeed: 2.5
+  _sprintSpeedMultiplier: 2
   _horizontalAcceleration: 5
   _verticalAcceleration: 3.2
   _deceleration: 2.4

@@ -10,6 +10,7 @@ public sealed class PlayerOxygen : MonoBehaviour
     private PlayerCondition _condition;
 
     private float _currentOxygen;
+    private float _extraConsumePerSecond;
     private Vector2 _moveInput;
     private bool _isSprinting;
     private bool _isConsumingOxygen;
@@ -20,6 +21,7 @@ public sealed class PlayerOxygen : MonoBehaviour
     public float CurrentOxygen => _currentOxygen;
     public float MaxOxygen => _oxygenData != null ? _oxygenData.MaxOxygen : 0.0f;
     public float OxygenRatio => MaxOxygen <= 0.0f ? 0.0f : _currentOxygen / MaxOxygen;
+    public float CrowbarUseConsumePerSecond => _oxygenData != null ? _oxygenData.CrowbarUseConsumePerSecond : 0.0f;
     public bool IsDepleted => _currentOxygen <= 0.0f;
 
     private void Awake()
@@ -46,6 +48,7 @@ public sealed class PlayerOxygen : MonoBehaviour
     {
         // 복귀 성공 또는 익사 실패 후에는 산소 소모를 더 진행하지 않는다.
         StopConsumingOxygen();
+        ClearExtraConsumePerSecond();
     }
 
     private void Update()
@@ -72,6 +75,17 @@ public sealed class PlayerOxygen : MonoBehaviour
         // Controller에서 받은 이동 입력 상태를 산소 소모 계산에 사용한다.
         _moveInput = moveInput;
         _isSprinting = isSprinting;
+    }
+
+    public void SetExtraConsumePerSecond(float consumePerSecond)
+    {
+        // 쇠지레 사용 같은 추가 행동 산소 소모를 설정한다.
+        _extraConsumePerSecond = Mathf.Max(0.0f, consumePerSecond);
+    }
+
+    public void ClearExtraConsumePerSecond()
+    {
+        _extraConsumePerSecond = 0f;
     }
 
     public void StartConsumingOxygen()
@@ -141,11 +155,13 @@ public sealed class PlayerOxygen : MonoBehaviour
         {
             _currentOxygen = 0.0f;
             _isConsumingOxygen = false;
+            _extraConsumePerSecond = 0.0f;
             return;
         }
 
         _currentOxygen = _oxygenData.MaxOxygen;
         _isConsumingOxygen = _consumeOxygenOnStart;
+        _extraConsumePerSecond = 0f;
 
         // 초기 산소값도 UI에 반영될 수 있게 알린다.
         OxygenChanged?.Invoke(_currentOxygen, _oxygenData.MaxOxygen);
@@ -158,19 +174,22 @@ public sealed class PlayerOxygen : MonoBehaviour
             return 0.0f;
         }
 
+        float baseConsumePerSecond;
+
         if (_isSprinting)
         {
             // 빠른 헤엄은 가장 높은 산소 소모를 사용한다.
-            return _oxygenData.SprintConsumePerSecond;
+            baseConsumePerSecond = _oxygenData.SprintConsumePerSecond;
         }
-
-        if (_moveInput.sqrMagnitude > 0.01f)
+        else if(_moveInput.sqrMagnitude > 0.01f)
         {
-            // 일반 이동 중에는 보통 산소 소모를 사용한다.
-            return _oxygenData.MoveConsumePerSecond;
+            baseConsumePerSecond = _oxygenData.MoveConsumePerSecond;
+        }
+        else
+        {
+            baseConsumePerSecond = _oxygenData.IdleConsumePerSecond;
         }
 
-        // 가만히 있어도 호흡은 계속하므로 낮은 산소 소모를 사용한다.
-        return _oxygenData.IdleConsumePerSecond;
+        return baseConsumePerSecond + _extraConsumePerSecond;
     }
 }

@@ -6,6 +6,8 @@ public sealed class PlayerInputReader : MonoBehaviour
     public event Action<Vector2> MoveInputChanged;
     public event Action<bool> SprintInputChanged;
     public event Action InteractInputStarted;
+    public event Action InteractInputCanceled;
+    public event Action FlashlightToggleInputStarted;
 
     public Vector2 MoveInput { get; private set; }
     public bool IsSprinting { get; private set; }
@@ -34,6 +36,17 @@ public sealed class PlayerInputReader : MonoBehaviour
         InteractInputStarted?.Invoke();
     }
 
+    public void NotifyInteractInputCanceled()
+    {
+        InteractInputCanceled?.Invoke();
+    }
+
+    public void NotifyFlashlightToggleInputStarted()
+    {
+        // 플래시라이트 토글 입력이 시작되었음을 알린다.
+        FlashlightToggleInputStarted?.Invoke();
+    }
+
     public void ResetInput()
     {
         // 입력 상태가 남아 플레이어가 계속 움직이는 문제를 방지한다.
@@ -42,6 +55,7 @@ public sealed class PlayerInputReader : MonoBehaviour
 
         MoveInputChanged?.Invoke(MoveInput);
         SprintInputChanged?.Invoke(IsSprinting);
+        InteractInputCanceled?.Invoke();
     }
 
     private void OnDisable()

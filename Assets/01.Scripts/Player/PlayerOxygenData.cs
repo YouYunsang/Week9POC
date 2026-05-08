@@ -13,6 +13,9 @@ public sealed class PlayerOxygenData : ScriptableObject
     [SerializeField] private float _moveConsumePerSecond = 0.8f;
     [SerializeField] private float _sprintConsumePerSecond = 1.6f;
 
+    [Header("Action Consume Per Second")]
+    [SerializeField] private float _crowbarUseConsumePerSecond = 1.2f;
+
     [Header("Instant Consume")]
     [SerializeField] private float _defaultInstantConsumeAmount = 5.0f;
 
@@ -20,6 +23,7 @@ public sealed class PlayerOxygenData : ScriptableObject
     public float IdleConsumePerSecond => _idleConsumePerSecond;
     public float MoveConsumePerSecond => _moveConsumePerSecond;
     public float SprintConsumePerSecond => _sprintConsumePerSecond;
+    public float CrowbarUseConsumePerSecond => _crowbarUseConsumePerSecond;
     public float DefaultInstantConsumeAmount => _defaultInstantConsumeAmount;
 
 #if UNITY_EDITOR
@@ -32,6 +36,7 @@ public sealed class PlayerOxygenData : ScriptableObject
         _idleConsumePerSecond = Mathf.Max(0.0f, _idleConsumePerSecond);
         _moveConsumePerSecond = Mathf.Max(0.0f, _moveConsumePerSecond);
         _sprintConsumePerSecond = Mathf.Max(0.0f, _sprintConsumePerSecond);
+        _crowbarUseConsumePerSecond = Mathf.Max(0.0f, _crowbarUseConsumePerSecond);
 
         // 즉시 소모량도 음수가 되지 않도록 제한한다.
         _defaultInstantConsumeAmount = Mathf.Max(0.0f, _defaultInstantConsumeAmount);

@@ -5,6 +5,9 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerCondition))]
 [RequireComponent(typeof(PlayerOxygen))]
 [RequireComponent(typeof(PlayerInteractionDetector))]
+[RequireComponent(typeof(PlayerHeldInteraction))]
+[RequireComponent(typeof(PlayerInventory))]
+[RequireComponent(typeof(PlayerFlashlight))]
 public sealed class PlayerController : MonoBehaviour
 {
     private PlayerInputReader _inputReader;
@@ -12,22 +15,16 @@ public sealed class PlayerController : MonoBehaviour
     private PlayerCondition _condition;
     private PlayerOxygen _oxygen;
     private PlayerInteractionDetector _interactionDetector;
+    private PlayerHeldInteraction _heldInteraction;
+    private PlayerFlashlight _flashlight;
 
     private Vector2 _moveInput;
     private bool _isSprinting;
 
+    private const float MOVE_CANCEL_THRESHOLD = 0.1f;
+
     public bool IsSprinting => _isSprinting;
     public bool CanMove => _condition != null && _condition.CanMove;
-
-    private void Reset()
-    {
-        // 같은 GameObject 내부 컴포넌트를 Awake에서 캐싱한다.
-        _inputReader = GetComponent<PlayerInputReader>();
-        _movement = GetComponent<PlayerMovement>();
-        _condition = GetComponent<PlayerCondition>();
-        _oxygen = GetComponent<PlayerOxygen>();
-        _interactionDetector = GetComponent<PlayerInteractionDetector>();
-    }
 
     private void Awake()
     {
@@ -37,6 +34,8 @@ public sealed class PlayerController : MonoBehaviour
         _condition = GetComponent<PlayerCondition>();
         _oxygen = GetComponent<PlayerOxygen>();
         _interactionDetector = GetComponent<PlayerInteractionDetector>();
+        _heldInteraction = GetComponent<PlayerHeldInteraction>();
+        _flashlight = GetComponent<PlayerFlashlight>();
     }
 
     private void OnEnable()
@@ -45,6 +44,8 @@ public sealed class PlayerController : MonoBehaviour
         _inputReader.MoveInputChanged += HandleMoveInputChanged;
         _inputReader.SprintInputChanged += HandleSprintInputChanged;
         _inputReader.InteractInputStarted += HandleInteractInputStarted;
+        _inputReader.InteractInputCanceled += HandleInteractInputCanceled;
+        _inputReader.FlashlightToggleInputStarted += HandleFlashlightToggleInputStarted;
 
         // 산소 고갈 이벤트를 구독한다.
         _oxygen.OxygenDepleted += HandleOxygenDepleted;
@@ -56,6 +57,8 @@ public sealed class PlayerController : MonoBehaviour
         _inputReader.MoveInputChanged -= HandleMoveInputChanged;
         _inputReader.SprintInputChanged -= HandleSprintInputChanged;
         _inputReader.InteractInputStarted -= HandleInteractInputStarted;
+        _inputReader.InteractInputCanceled -= HandleInteractInputCanceled;
+        _inputReader.FlashlightToggleInputStarted -= HandleFlashlightToggleInputStarted;
 
         _oxygen.OxygenDepleted -= HandleOxygenDepleted;
     }
@@ -95,6 +98,13 @@ public sealed class PlayerController : MonoBehaviour
             return;
         }
 
+        if (_heldInteraction.IsHolding &&
+            moveInput.sqrMagnitude > MOVE_CANCEL_THRESHOLD * MOVE_CANCEL_THRESHOLD)
+        {
+            // Hold 상호작용 중 이동 입력이 들어오면 작업을 취소한다.
+            _heldInteraction.CancelHold();
+        }
+
         // 입력값은 Controller가 보관하고, 실제 이동은 Update에서 일괄 전달한다.
         _moveInput = moveInput;
     }
@@ -118,8 +128,20 @@ public sealed class PlayerController : MonoBehaviour
             return;
         }
 
-        // 현재 감지 중인 상호작용 대상과 상호작용을 시도한다.
+        // Hold 상호작용 대상이면 먼저 Hold를 시작한다.
+        if (_heldInteraction.TryBeginHold())
+        {
+            return;
+        }
+
+        // Hold 대상이 아니면 일반 상호작용을 시도한다.
         _interactionDetector.TryInteract();
+    }
+
+    private void HandleInteractInputCanceled()
+    {
+        // E를 떼면 진행 중인 Hold 상호작용을 취소한다.
+        _heldInteraction.CancelHold();
     }
 
     private void HandleOxygenDepleted()
@@ -127,8 +149,20 @@ public sealed class PlayerController : MonoBehaviour
         // 산소 고갈은 플레이어 사망 상태로 전환된다.
         _condition.Die();
 
-        // 사망 즉시 이동 입력을 제거한다.
+        // 사망 즉시 진행 중인 Hold 상호작용과 이동 입력을 제거한다.
+        _heldInteraction.CancelHold();
         ClearMovementInput();
+    }
+
+    private void HandleFlashlightToggleInputStarted()
+    {
+        if (!_condition.CanReceiveInput)
+        {
+            return;
+        }
+
+        // F 입력으로 플래시라이트를 켜거나 끈다.
+        _flashlight.Toggle();
     }
 
     private void ClearMovementInput()

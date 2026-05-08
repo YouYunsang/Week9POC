@@ -1,18 +1,41 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(PlayerCondition))]
+[RequireComponent(typeof(PlayerInventory))]
+[RequireComponent(typeof(PlayerOxygen))]
 public sealed class PlayerInteractionDetector : MonoBehaviour
 {
     private readonly List<IInteractable> _interactables = new List<IInteractable>();
 
     private PlayerCondition _condition;
+    private PlayerInventory _inventory;
+    private PlayerOxygen _oxygen;
 
-    public bool HasInteractable => GetBestInteractable() != null;
+    public bool HasInteractable => TryGetBestInteractable(out _);
+
+    private void Reset()
+    {
+        // 같은 GameObject의 플레이어 상태 컴포넌트를 캐싱한다.
+        _condition = GetComponent<PlayerCondition>();
+
+        // 같은 GameObject의 인벤토리 컴포넌트를 캐싱한다.
+        _inventory = GetComponent<PlayerInventory>();
+
+        // 같은 GameObject의 산소 컴포넌트를 캐싱한다.
+        _oxygen = GetComponent<PlayerOxygen>();
+    }
 
     private void Awake()
     {
         // 같은 GameObject의 플레이어 상태 컴포넌트를 캐싱한다.
         _condition = GetComponent<PlayerCondition>();
+
+        // 같은 GameObject의 인벤토리 컴포넌트를 캐싱한다.
+        _inventory = GetComponent<PlayerInventory>();
+
+        // 같은 GameObject의 산소 컴포넌트를 캐싱한다.
+        _oxygen = GetComponent<PlayerOxygen>();
     }
 
     private void OnTriggerEnter2D(Collider2D other)
@@ -63,14 +86,12 @@ public sealed class PlayerInteractionDetector : MonoBehaviour
             return;
         }
 
-        IInteractable interactable = GetBestInteractable();
-
-        if (interactable == null)
+        if(!TryGetBestInteractable(out IInteractable interactable))
         {
             return;
         }
 
-        InteractionContext context = new InteractionContext(gameObject, _condition);
+        InteractionContext context = CreateInteractionContext();
 
         if (!interactable.CanInteract(context))
         {
@@ -81,42 +102,44 @@ public sealed class PlayerInteractionDetector : MonoBehaviour
         interactable.Interact(context);
     }
 
-    private IInteractable GetBestInteractable()
+    public bool TryGetBestInteractable(out IInteractable bestInteractable)
     {
-        if (_interactables.Count <= 0)
+        bestInteractable = null;
+
+        if(_interactables.Count <= 0)
         {
-            return null;
+            return false;
         }
 
-        IInteractable bestInteractable = null;
         int bestPriority = int.MinValue;
+        InteractionContext context = CreateInteractionContext();
 
-        for (int i = _interactables.Count - 1; i >= 0; i--)
+        for(int i = _interactables.Count - 1; i >=0; i--)
         {
             IInteractable interactable = _interactables[i];
 
-            if (interactable == null)
+            if(interactable == null)
             {
                 _interactables.RemoveAt(i);
                 continue;
             }
 
-            InteractionContext context = new InteractionContext(gameObject, _condition);
-
-            if (!interactable.CanInteract(context))
-            {
+            if(!interactable.CanInteract(context))
                 continue;
-            }
 
-            if (interactable.InteractionPriority <= bestPriority)
-            {
+            if(interactable.InteractionPriority <= bestPriority)
                 continue;
-            }
 
             bestInteractable = interactable;
             bestPriority = interactable.InteractionPriority;
         }
 
-        return bestInteractable;
+        return bestInteractable != null;
+    }
+
+    public InteractionContext CreateInteractionContext()
+    {
+        // 상호작용에 필요한 플레이어 관련 정보를 묶어서 전달한다.
+        return new InteractionContext(gameObject, _condition, _inventory, _oxygen);
     }
 }

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08868ffe03a9a274c88276cad9a8bd5d, type: 3}
   m_Name: CameraZoomData
   m_EditorClassIdentifier: Assembly-CSharp::CameraZoomData
-  _defaultOrthographicSize: 6
+  _defaultOrthographicSize: 8
   _minOrthographicSize: 3.5
-  _maxOrthographicSize: 8.5
+  _maxOrthographicSize: 13.5
   _zoomSensitivity: 0.4
   _zoomSmoothTime: 0.12

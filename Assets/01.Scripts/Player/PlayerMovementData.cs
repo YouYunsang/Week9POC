@@ -7,7 +7,7 @@ public sealed class PlayerMovementData : ScriptableObject
 {
     [Header("Base Movement")]
     [SerializeField] private float _baseMoveSpeed = 2.2f;
-    [SerializeField] private float _sprintSpeedMultiplier = 1.45f;
+    [SerializeField] private float _sprintSpeedMultiplier = 2f;
 
     [Header("Acceleration")]
     [SerializeField] private float _horizontalAcceleration = 5.0f;
