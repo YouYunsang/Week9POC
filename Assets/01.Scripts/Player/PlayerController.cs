@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(PlayerInputReader))]
 [RequireComponent(typeof(PlayerMovement))]
@@ -17,6 +18,7 @@ public sealed class PlayerController : MonoBehaviour
     private PlayerInteractionDetector _interactionDetector;
     private PlayerHeldInteraction _heldInteraction;
     private PlayerFlashlight _flashlight;
+    private PlayerInventory _inventory;
 
     private Vector2 _moveInput;
     private bool _isSprinting;
@@ -36,6 +38,7 @@ public sealed class PlayerController : MonoBehaviour
         _interactionDetector = GetComponent<PlayerInteractionDetector>();
         _heldInteraction = GetComponent<PlayerHeldInteraction>();
         _flashlight = GetComponent<PlayerFlashlight>();
+        _inventory = GetComponent<PlayerInventory>();
     }
 
     private void OnEnable()
@@ -75,6 +78,8 @@ public sealed class PlayerController : MonoBehaviour
 
         // 산소 컴포넌트에는 현재 이동 상태를 전달한다.
         _oxygen.SetMovementState(finalMoveInput, finalSprintState);
+
+        HandleDropInput();
     }
 
     public void SetMovementEnabled(bool isEnabled)
@@ -163,6 +168,26 @@ public sealed class PlayerController : MonoBehaviour
 
         // F 입력으로 플래시라이트를 켜거나 끈다.
         _flashlight.Toggle();
+    }
+
+    private void HandleDropInput()
+    {
+        if (!_condition.CanReceiveInput)
+        {
+            return;
+        }
+
+        if (Keyboard.current == null || !Keyboard.current.qKey.wasPressedThisFrame)
+        {
+            return;
+        }
+
+        if (_inventory == null)
+        {
+            return;
+        }
+
+        _inventory.TryDropRandomNonToolItem(out _);
     }
 
     private void ClearMovementInput()

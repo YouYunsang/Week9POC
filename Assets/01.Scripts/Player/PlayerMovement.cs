@@ -1,11 +1,13 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(PlayerInventory))]
 public sealed class PlayerMovement : MonoBehaviour
 {
     [SerializeField] private PlayerMovementData _movementData;
 
     private Rigidbody2D _rigidbody;
+    private PlayerInventory _inventory;
     private Vector2 _moveInput;
     private bool _isSprinting;
     private bool _isBuoyancyEnabled = true;
@@ -16,6 +18,7 @@ public sealed class PlayerMovement : MonoBehaviour
     {
         // Rigidbody2D는 Awake에서 캐싱한다.
         _rigidbody = GetComponent<Rigidbody2D>();
+        _inventory = GetComponent<PlayerInventory>();
 
         // 수중 이동이므로 중력은 사용하지 않는다.
         _rigidbody.gravityScale = 0.0f;
@@ -104,7 +107,17 @@ public sealed class PlayerMovement : MonoBehaviour
         }
 
         // 수직 입력이 없으면 몸이 조금씩 떠오른다.
-        return _movementData.IdleBuoyancySpeed;
+        return _movementData.IdleBuoyancySpeed * CalculateBuoyancyWeightMultiplier();
+    }
+
+    private float CalculateBuoyancyWeightMultiplier()
+    {
+        if (_inventory == null)
+        {
+            return 1.0f;
+        }
+
+        return 1.0f - _inventory.WeightRatio;
     }
 
     private Vector2 CalculateNextVelocity(Vector2 targetVelocity, Vector2 input)

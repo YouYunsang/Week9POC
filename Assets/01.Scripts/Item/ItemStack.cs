@@ -51,4 +51,14 @@ public struct ItemStack
         // 슬롯 최대 스택 수를 넘지 않도록 수량을 더한다.
         _amount = Mathf.Clamp(_amount + amount, 0, _itemData.MaxStackPerSlot);
     }
+
+    public void RemoveAmount(int amount)
+    {
+        if (IsEmpty)
+        {
+            return;
+        }
+
+        _amount = Mathf.Max(0, _amount - Mathf.Max(0, amount));
+    }
 }

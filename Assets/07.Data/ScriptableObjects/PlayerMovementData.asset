@@ -21,6 +21,6 @@ MonoBehaviour:
   _directionChangeResistanceMultiplier: 0.45
   _downwardSpeedMultiplier: 0.65
   _upwardSpeedMultiplier: 0.85
-  _idleBuoyancySpeed: 0.28
+  _idleBuoyancySpeed: 1
   _buoyancyAcceleration: 1.1
   _inputDeadZone: 0.1
